@@ -15,35 +15,49 @@ def iniciar_webcam():
     # Se tiver mais de uma webcam, os índices podem ser 1, 2, etc.
     captura = cv2.VideoCapture(0)
     
-    # --- Passo 1: Inicializar o quadro de referência ---
-    # Ele começa como None, pois ainda não temos o primeiro quadro
-    quadro_referencia = None
+    # --- Passo 1: Inicializar o modelo de fundo ---
+    # Ele começa como None. É criado no primeiro loop.
+    # É preciso usar imagens de ponto flutuante para a matemática da média
+    fundo_medio = None
     
+    # --- O 'alpha' da média móvel. Controla a velocidade de adaptação ---
+    alpha = 0.1 # Valor inicial. Quanto maior mais rapido se adapta
+    
+    if not captura.isOpened():
+        print("Erro: Não foi possivel abrir a câmera")
+        return
+        
     while True:
         ret, frame = captura.read()
         if not ret:
             break
+        
 
     # Variável para indicar se há movimento no quadro atual
         movimento_detectado = False
         
-        # --- Passo 2: Pré-Processar a imagem ---
+        # --- Passo 2: Atualizar modelo de fundo ---
         # Converter para escala de cinza
         cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # Aplica desfoque Gaussiano para suavizar
-        cinza = cv2.GaussianBlur(cinza, (21, 21), 0)
+        # Aplica desfoque Gaussiano para suavizar (Terminar com 1 sempre)
+        cinza = cv2.GaussianBlur(cinza, (11, 11), 0)  # Aumente para ficar menos sensível, abaixe para maior sensibilidade
         
-        if quadro_referencia is None:
-            quadro_referencia = cinza
+        if fundo_medio is None:
+            fundo_medio = cinza.copy().astype("float")
             continue
         
-        # --- Passo 3 : Calcular a Diferença ---
-        diferenca = cv2.absdiff(quadro_referencia, cinza) # Calcula a diferença absoluta entre o quadro atual e o de referência
-
-        # --- Passo: 4 Limiarização (Thresholding) --- 
-        # Se um pixel tem uma diferença maior que 30, ele se torna branco (255), senão preto (0) 
-        thresh = cv2.threshold(diferenca, 30, 255, cv2.THRESH_BINARY)[1]
+        # --- Passo 3 : Atualização do fundo médio ---
+        cv2.accumulateWeighted(cinza, fundo_medio, alpha)
         
+        # --- Passo: 4 Converter o fundo de float para inteiro de 8-bits para visualização e comparação --- 
+        fundo_para_diff = cv2.convertScaleAbs(fundo_medio)
+
+        # Calcula a diferença absoluta entre o quadro atual e o de referência
+        diferenca = cv2.absdiff(fundo_para_diff, cinza)
+        
+        # Se um pixel tem uma diferença maior que 30, ele se torna branco (255), senão preto (0)
+        thresh = cv2.threshold(diferenca, 30, 255, cv2.THRESH_BINARY)[1]
+              
         # Dilatar a imagem do threshold para preencher buracos e destacar o movimento
         thresh = cv2.dilate(thresh, None, iterations=2)
         
@@ -52,8 +66,8 @@ def iniciar_webcam():
         
         # --- Passo 6: FIltrar e Desenhar ---
         for contorno in contornos:
-            #Se a área do contorno for muito peuqna, ignorá-la (é só ruído)
-            if cv2. contourArea(contorno) < 1000:
+            #Se a área do contorno for muito pequena, ignorá-la (é só ruído)
+            if cv2. contourArea(contorno) < 1500: # Aumentar ou diminuir área mínima
                 continue
             
             #Se chegar aqui, significa que foi encontrado movimento significativo
@@ -80,7 +94,7 @@ def iniciar_webcam():
         # Para uma detecção mais simples, você pode comentar a linha abaixo.
         # Assim, a comparação será sempre com o PRIMEIRO quadro.
         # Descomente se quiser que ele se adapte a novas condições de fundo lentamente.
-        # quadro_referencia = cinza 
+        # fundo_medio = cinza 
         
         # Condição de saída
         # Condição 1: A tecla 'q' foi pressionada?
