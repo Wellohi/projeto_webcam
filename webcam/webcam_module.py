@@ -93,9 +93,17 @@ def iniciar_webcam():
             if (tempo_atual - alerta_module.ultimo_alerta_enviado) > alerta_module.COOLDOWN_SEGUNDOS:
                 print("Movimento detectado! Verificando cooldown...")
                 
+                # Definir nome do arquivo para a "evidência"
+                nome_arquivo_alerta = "alerta_movimento.jpg"
+                
+                # Salvar o frame de movimento com o nome definido
+                cv2.imwrite(nome_arquivo_alerta, frame)
+                
                 if alerta_module.METODO_ALERTA == "telegram":
+                    #chamar a  função, passando legenda e caminho do arquivo
+                    mensagem_alerta = f"ALERTA: Movimento detectado às {time.strftime("%H:%M:%S de %d/%m/%Y")}"
                     # Use asynco.run() para executar a fução async a partir do código síncrono
-                    if alerta_module.asyncio.run(alerta_module.enviar_alerta_telegram("ALERTA! Movimento detectado pela câmera!")):
+                    if alerta_module.asyncio.run(alerta_module.enviar_alerta_telegram(mensagem_alerta, nome_arquivo_alerta)):
                         # Atualiza o tempo se o alerta for envado com sucesso
                         alerta_module.ultimo_alerta_enviado = tempo_atual
                 

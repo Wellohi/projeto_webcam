@@ -10,11 +10,11 @@ TELEGRAM_TOKEN = '7715103286:AAGmisvjviGhICSfD81I_yQOFin-Wvt9g8I' # Colar token 
 TELEGRAM_CHAT_ID = '7825204438' # Colar Chat ID aqui
 
 # Configuração do Cooldown
-COOLDOWN_SEGUNDOS = 10
+COOLDOWN_SEGUNDOS = 30
 ultimo_alerta_enviado = 0
 
 # --- FUNÇÃO DE ALERTA --- 
-async def enviar_alerta_telegram(mensagem, photo_path):
+async def enviar_alerta_telegram(caption, photo_path):
     """ Envia uma mensagem de texto simples via Telegram"""
     try:
         bot = telegram.Bot(token=TELEGRAM_TOKEN)
@@ -24,16 +24,16 @@ async def enviar_alerta_telegram(mensagem, photo_path):
         # 'caption=caption': O texto que você quer enviar junto com a imagem.
         
         # Use "await" para executar a função assíncrona
-        # await bot.send_message(chat_id=TELEGRAM_CHAT_ID, photo=open(photo_path, 'rb'), caption=caption)
-        # print(f"Alerta com foto enviado via Telgram!")
-        # return True
-        
-        await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=mensagem) # Enviar apenas a mensagem
-        print(f"Alerta enviado via Telegram: '{mensagem}'")
+        await bot.send_photo(chat_id=TELEGRAM_CHAT_ID, photo=open(photo_path, 'rb'), caption=caption)
+        print(f"Alerta com foto enviado via Telgram!")
         return True
+        
+        # await bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=mensagem) # Enviar apenas a mensagem
+        # print(f"Alerta enviado via Telegram: '{mensagem}'")
+        # return True
         
         
     except Exception as e:
-        print(f"Erro ao enviar alerta via Telegram: '{e}'")
+        print(f"Erro ao enviar alerta com foto via Telegram: '{e}'")
         return False
         
