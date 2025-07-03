@@ -1,4 +1,10 @@
 import cv2
+import time
+import alerta_module
+
+# # Configuração do Cooldown
+# COOLDOWN_SEGUNDOS = 120 
+# ultimo_alerta_enviado = 0
 
 
 def iniciar_webcam():
@@ -21,12 +27,14 @@ def iniciar_webcam():
     fundo_medio = None
     
     # --- O 'alpha' da média móvel. Controla a velocidade de adaptação ---
-    alpha = 0.1 # Valor inicial. Quanto maior mais rapido se adapta
+    alpha = 0.05 # Valor inicial. Quanto maior mais rapido se adapta
     
     if not captura.isOpened():
         print("Erro: Não foi possivel abrir a câmera")
         return
-        
+    
+    print(f"Detecção iniciada. Alertas serão enviados a cada {alerta_module.COOLDOWN_SEGUNDOS} segundos, se houver movimento.")
+
     while True:
         ret, frame = captura.read()
         if not ret:
@@ -40,7 +48,8 @@ def iniciar_webcam():
         # Converter para escala de cinza
         cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Aplica desfoque Gaussiano para suavizar (Terminar com 1 sempre)
-        cinza = cv2.GaussianBlur(cinza, (11, 11), 0)  # Aumente para ficar menos sensível, abaixe para maior sensibilidade
+        cinza = cv2.GaussianBlur(cinza, (9, 9), 0)  # Aumente para ficar menos sensível, abaixe para maior sensibilidade
+    
         
         if fundo_medio is None:
             fundo_medio = cinza.copy().astype("float")
@@ -67,7 +76,7 @@ def iniciar_webcam():
         # --- Passo 6: FIltrar e Desenhar ---
         for contorno in contornos:
             #Se a área do contorno for muito pequena, ignorá-la (é só ruído)
-            if cv2. contourArea(contorno) < 1500: # Aumentar ou diminuir área mínima
+            if cv2. contourArea(contorno) < 2000: # Aumentar ou diminuir área mínima
                 continue
             
             #Se chegar aqui, significa que foi encontrado movimento significativo
@@ -80,13 +89,24 @@ def iniciar_webcam():
             
         # Escreve um texto na tela se houver movimento
         if movimento_detectado:
+            tempo_atual = time.time()
+            if (tempo_atual - alerta_module.ultimo_alerta_enviado) > alerta_module.COOLDOWN_SEGUNDOS:
+                print("Movimento detectado! Verificando cooldown...")
+                
+                if alerta_module.METODO_ALERTA == "telegram":
+                    # Use asynco.run() para executar a fução async a partir do código síncrono
+                    if alerta_module.asyncio.run(alerta_module.enviar_alerta_telegram("ALERTA! Movimento detectado pela câmera!")):
+                        # Atualiza o tempo se o alerta for envado com sucesso
+                        alerta_module.ultimo_alerta_enviado = tempo_atual
+                
             cv2.putText(frame, "Movimento Detectado!", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         else:
             cv2.putText(frame, "Sem Movimento", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             
         # Exbe o resultado          
         cv2.imshow(window_name, frame)
-        # Para debug, você também pode querer ver as outras janelas:
+        
+        # Para debug, ver as outras janelas:
         cv2.imshow("Threshold (Diferenca em Branco e Preto)", thresh)
         cv2.imshow("Diferenca de Quadros", diferenca)
 
@@ -117,22 +137,6 @@ def iniciar_webcam():
     captura.release()
     cv2.destroyAllWindows()
         
-
-    # # Verifica se a webcam foi aberta corretamente
-    # if not captura.isOpened():
-    #     print('Não foi possível abrir a câmera!') 
-    # else:
-    #     while True:
-    #         ret, frame = captura.read()
-            
-    #         if not ret:
-    #             print('Não foi possível capturar o frame!')
-    #             break
-            
-    #         # Usamos a variável com o nome da janela aqui.
-    #         cv2.imshow(window_name, frame)
-            
-           
 
 if __name__ == '__main__':
     print('Executando modulo de webcam diretamente para teste')

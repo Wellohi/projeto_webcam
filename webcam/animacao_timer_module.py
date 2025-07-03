@@ -2,7 +2,7 @@ import time
 import sys
 
 
-def animacao_loading(duracao):
+def animacao_timer_module(duracao):
     """
     Exibe uma animação de loading no terminal.
     

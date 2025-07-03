@@ -1,8 +1,8 @@
 import webcam_module
-import timer_module
+import animacao_timer_module 
 
 print('Buscando Webcam')
 
-timer_module.animacao_loading(1)
+animacao_timer_module.animacao_timer_module(1)
     
 webcam_module.iniciar_webcam()
