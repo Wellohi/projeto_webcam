@@ -1,1 +1,6 @@
+# Ignorar arquivos de variaveis de ambiente
 .venv
+.env
+
+# Ignora arquivo de imagem jpg
+.jpg

@@ -1,13 +1,16 @@
 import telegram 
 import asyncio
+import os
+from dotenv import load_dotenv
 
 
 # --- CONFIGURAÇÕES DE ALERTA ---
 METODO_ALERTA = 'telegram' # ou 'email'
 
-# Configurações do Telegram
-TELEGRAM_TOKEN = '7715103286:AAGmisvjviGhICSfD81I_yQOFin-Wvt9g8I' # Colar token do BotFather aqui
-TELEGRAM_CHAT_ID = '7825204438' # Colar Chat ID aqui
+load_dotenv() # Carrega as variáveis do arquivo env
+
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 # Configuração do Cooldown
 COOLDOWN_SEGUNDOS = 30

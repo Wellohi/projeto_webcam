@@ -2,19 +2,13 @@ import cv2
 import time
 import alerta_module
 
-# # Configuração do Cooldown
-# COOLDOWN_SEGUNDOS = 120 
-# ultimo_alerta_enviado = 0
-
-
 def iniciar_webcam():
     """
     Inicia a captura de vídeo da webcam e exibe o feed em uma janela.
     A janela pode ser fechada pressionando 'q' ou clicando no 'X'.
     """
     
-    # É uma boa prática guardar o nome da janela em uma variável.
-    # Isso evita erros de digitação e facilita a manutenção.
+    # Nome da janela
     window_name = 'Webcam'
 
     # Inicializa a captura de vídeo da webcam (geralmente o dispositivo 0)
@@ -115,8 +109,8 @@ def iniciar_webcam():
         cv2.imshow(window_name, frame)
         
         # Para debug, ver as outras janelas:
-        cv2.imshow("Threshold (Diferenca em Branco e Preto)", thresh)
-        cv2.imshow("Diferenca de Quadros", diferenca)
+        # cv2.imshow("Threshold (Diferenca em Branco e Preto)", thresh)
+        # cv2.imshow("Diferenca de Quadros", diferenca)
 
         # Atualiza o quadro de referência (opcional, mas pode ser útil)
         # Para uma detecção mais simples, você pode comentar a linha abaixo.

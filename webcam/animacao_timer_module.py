@@ -27,3 +27,6 @@ def animacao_timer_module(duracao):
         i += 1
         
     print('\nSucessfully Loaded!')
+
+if __name__ == '__main__':
+    animacao_timer_module(5)
