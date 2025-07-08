@@ -143,4 +143,3 @@ def iniciar_webcam():
 if __name__ == '__main__':
     print('Executando modulo de webcam diretamente para teste')
     iniciar_webcam()
-
